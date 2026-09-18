@@ -39,13 +39,13 @@
     <div class="control-row">
         <div class="card">
             <span class="card-label">Away Name:</span>
-            <input type="text" class="team-input" id="input-away-name" value="AWY" maxlength="3" oninput="changeTeamName('away')">
+            <input type="text" class="team-input" id="input-away-name" value="AWY" maxlength="10" oninput="changeTeamName('away')">
             <button class="btn-sub" onclick="modifyScore('away', -1)">-</button>
             <button class="btn-add" onclick="modifyScore('away', 1)">+</button>
         </div>
         <div class="card">
             <span class="card-label">Home Name:</span>
-            <input type="text" class="team-input" id="input-home-name" value="HOM" maxlength="3" oninput="changeTeamName('home')">
+            <input type="text" class="team-input" id="input-home-name" value="HOM" maxlength="10" oninput="changeTeamName('home')">
             <button class="btn-sub" onclick="modifyScore('home', -1)">-</button>
             <button class="btn-add" onclick="modifyScore('home', 1)">+</button>
         </div>
