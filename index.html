@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Cross-Device Softball Scorebug</title>
+    <title> Ballpark-Proof Softball Scorebug </title>
     <style>
         html, body {
             background-color: transparent;
@@ -80,7 +80,7 @@
 
     <!-- IPAD CONTROL BOARD -->
     <div id="operator-deck">
-        <h2>Wireless Control Board</h2>
+        <h2> Ballpark Wireless Controller </h2>
         <div class="control-row">
             <div class="card">
                 <span class="card-label">Away Name:</span>
@@ -165,29 +165,29 @@
         </div>
     </div>
 
-    <!-- CLOUD SYNCHRONIZATION VIA PUBLIC BROKER -->
+    <!-- STABLE CLOCK POLLING INTERFACE -->
     <script>
         let gameState = { away: 0, home: 0, awayName: 'AWY', homeName: 'HOM', isTop: true, inning: 1, b: 0, s: 0, o: 0, runners: { 1: false, 2: false, 3: false } };
         
-        // Generate a random channel key based on your repository name to prevent stream interference
-        const streamChannel = btoa(window.location.pathname).replace(/=/g, "").substring(0, 12);
-        const syncAPI = `https://countapi.xyz{streamChannel}/state`;
+        // Creates a unique channel identifier based on your GitHub URL path
+        const channelID = btoa(window.location.pathname).replace(/=/g, "").substring(0, 10).toLowerCase();
+        const cloudStorageURL = `https://kvdb.io{channelID}_state`;
 
-        // Transmit state changes over the cloud web service
+        // Send changes from iPad up to the cloud storage locker
         async function commit() {
             render();
             try {
-                await fetch(`https://ntfy.sh{streamChannel}`, {
+                await fetch(cloudStorageURL, {
                     method: 'POST',
                     body: JSON.stringify(gameState)
                 });
-            } catch(e) {}
+            } catch(e) { console.log("Upload error, retrying...", e); }
         }
 
-        // Listen for realtime cloud updates from the iPad controller
-        function startCloudListener() {
-            if (window.location.search.includes('view=control')) return; // Controller doesn't listen
-            
-            const eventSource = new EventSource(`https://ntfy.sh{streamChannel}/sse`);
-            eventSource.onmessage = function(e) {
-                try {
+        // YoloBox reads from the cloud storage locker every 1 second
+        async function checkCloudUpdates() {
+            if (window.location.search.includes('view=control')) return; 
+            try {
+                const response = await fetch(cloudStorageURL);
+                if (response.ok) {
+                    const data = await response.json();
