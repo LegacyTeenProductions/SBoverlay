@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Softball Scorebug Overlay System</title>
+    <title>GitHub Cross-Device Softball Scorebug</title>
     <style>
-        /* Base Canvas Styles */
         html, body {
             background-color: transparent;
             margin: 0; padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             font-weight: 800; color: #ffffff;
             user-select: none; width: 100vw; height: 100vh; overflow: hidden;
         }
 
-        /* ==========================================================================
-           1. CONTROLLER UI VIEW (Hidden by default, shown via URL query parameter)
-           ========================================================================== */
+        /* 1. CONTROLLER UI VIEW */
         #operator-deck {
             display: none;
             background-color: #161a1d;
@@ -24,13 +21,13 @@
             padding: 25px; box-sizing: border-box;
             flex-direction: column; justify-content: flex-start; gap: 20px;
         }
-        h2 { margin: 0 0 10px 0; color: #adb5bd; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { margin: 0; color: #adb5bd; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
         .control-row { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         .card {
             background: #22252a; padding: 14px 20px; border-radius: 8px;
             display: flex; align-items: center; gap: 12px; border: 1px solid #2f343c;
         }
-        .card-label { font-size: 13px; text-transform: uppercase; color: #adb5bd; letter-spacing: 0.5px; }
+        .card-label { font-size: 13px; text-transform: uppercase; color: #adb5bd; }
         .team-input {
             background: #111; border: 1px solid #495057; color: #fff; padding: 8px;
             width: 60px; border-radius: 4px; font-weight: bold; text-transform: uppercase; text-align: center; font-size: 14px;
@@ -39,13 +36,11 @@
             background-color: #343a40; color: #ffffff; border: 1px solid #495057;
             padding: 14px 22px; font-size: 16px; cursor: pointer; border-radius: 6px; font-weight: bold;
         }
-        button:active { background-color: #495057; }
+        button:active { background-color: #444; }
         .btn-add { background-color: #2b9348; border-color: #2b9348; }
         .btn-sub { background-color: #e63946; border-color: #e63946; }
 
-        /* ==========================================================================
-           2. BROADCAST GRAPHICS LAYER VIEW (Default view shown on YoloBox)
-           ========================================================================== */
+        /* 2. BROADCAST GRAPHICS LAYER VIEW */
         #broadcast-canvas {
             display: flex; height: 100vh; width: 100vw; position: relative; background-color: transparent;
         }
@@ -64,7 +59,6 @@
         .data-segment { display: flex; align-items: center; justify-content: center; height: 100%; border-left: 1px solid #2d323f; padding: 0 14px; background-color: #151922; }
         .arrow-indicator { font-size: 12px; margin-right: 5px; color: #fca311; }
         
-        /* Diamond Runners */
         .diamond-wrap { position: relative; width: 24px; height: 24px; transform: rotate(45deg); }
         .base-pad { position: absolute; width: 9px; height: 9px; background-color: #454d5a; border: 1px solid #151922; }
         .base-pad.b-1 { top: 0; right: 0; }
@@ -72,7 +66,6 @@
         .base-pad.b-3 { bottom: 0; left: 0; }
         .base-pad.occupied { background-color: #fca311; box-shadow: 0 0 6px #fca311; }
 
-        /* BSO Matrix */
         .matrix-column { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: #8d99ae; }
         .matrix-row { display: flex; align-items: center; }
         .row-header { width: 10px; font-size: 10px; font-weight: bold; }
@@ -85,9 +78,9 @@
 </head>
 <body>
 
-    <!-- VIEW A: IPAD CONTROL BOARD -->
+    <!-- IPAD CONTROL BOARD -->
     <div id="operator-deck">
-        <h2>Softball Live Overlay Control Board</h2>
+        <h2>Wireless Control Board</h2>
         <div class="control-row">
             <div class="card">
                 <span class="card-label">Away Name:</span>
@@ -127,7 +120,7 @@
         </div>
     </div>
 
-    <!-- VIEW B: BROADCAST LAYER -->
+    <!-- BROADCAST LAYER -->
     <div id="broadcast-canvas">
         <div class="scorebug-container">
             <div class="team-block away-team">
@@ -172,12 +165,29 @@
         </div>
     </div>
 
-    <!-- LOGIC CORE -->
+    <!-- CLOUD SYNCHRONIZATION VIA PUBLIC BROKER -->
     <script>
         let gameState = { away: 0, home: 0, awayName: 'AWY', homeName: 'HOM', isTop: true, inning: 1, b: 0, s: 0, o: 0, runners: { 1: false, 2: false, 3: false } };
         
-        function commit() { localStorage.setItem('gh_softball_engine', JSON.stringify(gameState)); render(); }
-        function pull() { const cache = localStorage.getItem('gh_softball_engine'); if(cache) gameState = JSON.parse(cache); render(); }
-        
-        function modifyScore(team, delta) { gameState[team] = Math.max(0, gameState[team] + delta); commit(); }
-        function changeTeamName(team) {
+        // Generate a random channel key based on your repository name to prevent stream interference
+        const streamChannel = btoa(window.location.pathname).replace(/=/g, "").substring(0, 12);
+        const syncAPI = `https://countapi.xyz{streamChannel}/state`;
+
+        // Transmit state changes over the cloud web service
+        async function commit() {
+            render();
+            try {
+                await fetch(`https://ntfy.sh{streamChannel}`, {
+                    method: 'POST',
+                    body: JSON.stringify(gameState)
+                });
+            } catch(e) {}
+        }
+
+        // Listen for realtime cloud updates from the iPad controller
+        function startCloudListener() {
+            if (window.location.search.includes('view=control')) return; // Controller doesn't listen
+            
+            const eventSource = new EventSource(`https://ntfy.sh{streamChannel}/sse`);
+            eventSource.onmessage = function(e) {
+                try {
