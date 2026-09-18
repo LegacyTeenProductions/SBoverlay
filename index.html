@@ -3,68 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stacked Box Softball Scorebug Overlay</title>
+    <title>Full Screen Scalable Square Scorebug Overlay</title>
     <style>
+        /* Base Viewport Canvas - Standard Full Screen 16:9 Aspect Ratio */
         html, body {
             background-color: transparent;
             margin: 0; padding: 0;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             font-weight: 800; color: #ffffff;
-            user-select: none; width: 100vw; height: 100vh; overflow: hidden;
+            user-select: none; 
+            width: 100vw; 
+            height: 100vh; 
+            overflow: hidden;
         }
 
-        /* Compact Stacked Square Box Layout */
+        /* Large Bounding Box Container - Uses scalable 'vh' units to respond to downscaling perfectly */
         .scorebug-container {
             display: flex;
-            flex-direction: column; /* Stack rows vertically instead of a flat strip */
+            flex-direction: column; 
             background-color: #0b0c10;
-            border-radius: 6px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
-            width: 140px; /* Fixed square box width constraint */
-            overflow: hidden;
-            border: 1px solid #1f2833;
+            border-radius: 0.8vh;
+            box-shadow: 0 1vh 3vh rgba(0,0,0,0.8);
             
-            /* Pinned to the bottom-left corner */
+            /* Designed as a perfect scalable square ratio */
+            width: 18vh; 
+            height: 18vh; 
+            overflow: hidden;
+            border: 0.2vh solid #1f2833;
+            
+            /* Positioned in the lower-left corner with safe-zone padding */
             position: absolute;
-            left: 40px;
-            bottom: 40px;
+            left: 4vh;
+            bottom: 4vh;
         }
 
-        /* Team Row Styles */
+        /* Team Row Element Layouts */
         .team-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 34px;
-            border-bottom: 1px solid #2d323f;
+            height: 5.5vh; 
+            border-bottom: 0.2vh solid #2d323f;
         }
         .team-title {
-            padding: 0 12px;
-            font-size: 14px;
-            letter-spacing: 0.5px;
+            padding: 0 1.6vh;
+            font-size: 2vh; 
+            letter-spacing: 0.1vh;
             height: 100%;
             display: flex;
             align-items: center;
             flex-grow: 1;
+            font-weight: 900;
         }
-        .away-team .team-title { background-color: #bd1f36; }
-        .home-team .team-title { background-color: #1f4ebd; }
+        .away-team .team-title { background-color: #bd1f36; } 
+        .home-team .team-title { background-color: #1f4ebd; } 
         
         .score-val {
             background-color: #1f232b;
-            font-size: 18px;
-            width: 40px;
+            font-size: 2.8vh; 
+            width: 5.5vh;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 900;
         }
 
-        /* Game Data Status Row (Bottom Row of Box) */
+        /* Bottom Game Stats Data Bar */
         .status-row {
             display: flex;
             align-items: center;
-            height: 40px;
+            height: 7vh;
             background-color: #151922;
         }
 
@@ -76,26 +85,27 @@
             flex: 1;
         }
         .data-segment:not(:last-child) {
-            border-right: 1px solid #2d323f;
+            border-right: 0.2vh solid #2d323f;
         }
 
-        .arrow-indicator { font-size: 11px; margin-right: 3px; color: #fca311; }
-        .inning-num { font-size: 15px; }
+        /* Inning layouts */
+        .arrow-indicator { font-size: 1.4vh; margin-right: 0.4vh; color: #fca311; }
+        .inning-num { font-size: 2.2vh; font-weight: 900; }
         
         /* Diamond Runners Mapping */
-        .diamond-wrap { position: relative; width: 22px; height: 22px; transform: rotate(45deg); }
-        .base-pad { position: absolute; width: 8px; height: 8px; background-color: #454d5a; border: 1px solid #151922; }
+        .diamond-wrap { position: relative; width: 2.8vh; height: 2.8vh; transform: rotate(45deg); }
+        .base-pad { position: absolute; width: 1vh; height: 1vh; background-color: #454d5a; border: 0.1vh solid #151922; }
         .base-pad.b-1 { top: 0; right: 0; }
         .base-pad.b-2 { top: 0; left: 0; }
         .base-pad.b-3 { bottom: 0; left: 0; }
-        .base-pad.occupied { background-color: #fca311; box-shadow: 0 0 6px #fca311; }
+        .base-pad.occupied { background-color: #fca311; box-shadow: 0 0 0.8vh #fca311; }
 
-        /* BSO Matrix Panel Inside Box */
-        .matrix-column { display: flex; flex-direction: column; gap: 3px; font-size: 10px; color: #8d99ae; }
+        /* BSO Count Tracking Matrix Layout */
+        .matrix-column { display: flex; flex-direction: column; gap: 0.4vh; font-size: 1.1vh; color: #8d99ae; }
         .matrix-row { display: flex; align-items: center; }
-        .row-header { width: 8px; font-size: 9px; font-weight: bold; text-align: center; }
-        .dot-grid { display: flex; gap: 3px; margin-left: 4px; }
-        .indicator-dot { width: 6px; height: 6px; border-radius: 50%; background-color: #3d4554; }
+        .row-header { width: 1vh; font-size: 1.1vh; font-weight: bold; text-align: center; }
+        .dot-grid { display: flex; gap: 0.4vh; margin-left: 0.6vh; }
+        .indicator-dot { width: 0.8vh; height: 0.8vh; border-radius: 50%; background-color: #3d4554; }
         .indicator-dot.b-active { background-color: #00f5d4; }
         .indicator-dot.s-active { background-color: #ff5400; }
         .indicator-dot.o-active { background-color: #fca311; }
@@ -103,28 +113,31 @@
 </head>
 <body>
 
+    <!-- Target Output Component Canvas Layer -->
     <div class="scorebug-container">
-        <!-- Row 1: Away Team Info -->
+        
+        <!-- Row 1: Away Team Segment -->
         <div class="team-row away-team">
             <div class="team-title" id="disp-away-name">AWY</div>
             <div class="score-val" id="disp-away-score">0</div>
         </div>
 
-        <!-- Row 2: Home Team Info -->
+        <!-- Row 2: Home Team Segment -->
         <div class="team-row home-team">
             <div class="team-title" id="disp-home-name">HOM</div>
             <div class="score-val" id="disp-home-score">0</div>
         </div>
 
-        <!-- Row 3: Live Stats Status -->
+        <!-- Row 3: Status Tracking Base Bar -->
         <div class="status-row">
-            <!-- Inning Segment -->
+            
+            <!-- Inning display block -->
             <div class="data-segment">
                 <span class="arrow-indicator" id="disp-inning-arrow">&#9650;</span>
                 <span class="inning-num" id="disp-inning-num">1</span>
             </div>
 
-            <!-- Base Runners Diamond Segment -->
+            <!-- Base runner graphic map -->
             <div class="data-segment">
                 <div class="diamond-wrap">
                     <div class="base-pad b-2" id="disp-base-2"></div>
@@ -133,7 +146,7 @@
                 </div>
             </div>
 
-            <!-- Ball/Strike/Out Matrix Segment -->
+            <!-- Ball, Strike, Out data dots tracker -->
             <div class="data-segment">
                 <div class="matrix-column">
                     <div class="matrix-row">
@@ -150,9 +163,11 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
+    <!-- BACKEND ENGINE LOGIC CONFIGURATION -->
     <script>
         function pull() {
             const cache = localStorage.getItem('yolo_softball_engine');
