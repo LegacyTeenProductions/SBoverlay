@@ -1,4 +1,4 @@
-html<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -15,7 +15,7 @@ html<!DOCTYPE html>
         }
 
         /* ==========================================================================
-           1. CONTROLLER UI VIEW (Hidden by default, shown via URL #control flag)
+           1. CONTROLLER UI VIEW (Hidden by default, shown via URL query parameter)
            ========================================================================== */
         #operator-deck {
             display: none;
@@ -176,9 +176,8 @@ html<!DOCTYPE html>
     <script>
         let gameState = { away: 0, home: 0, awayName: 'AWY', homeName: 'HOM', isTop: true, inning: 1, b: 0, s: 0, o: 0, runners: { 1: false, 2: false, 3: false } };
         
-        // Remote Cloud-Sync Functionality (Uses standard localStorage + cross-window listeners)
         function commit() { localStorage.setItem('gh_softball_engine', JSON.stringify(gameState)); render(); }
         function pull() { const cache = localStorage.getItem('gh_softball_engine'); if(cache) gameState = JSON.parse(cache); render(); }
         
         function modifyScore(team, delta) { gameState[team] = Math.max(0, gameState[team] + delta); commit(); }
-        function changeTeamName(team) {if(team === 'away') gameState.awayName = document.getElementById('input-away-name').value.toUpperCase();else gameState.homeName = document.getElementById('input-home-name').value.toUpperCase();commit();}function shiftInningHalf() { gameState.isTop = !gameState.isTop; commit(); }function modifyInningNum(delta) { gameState.inning = Math.max(1, gameState.inning + delta); commit(); }function registerCount(action) {if(action === 'ball') { gameState.b++; if(gameState.b >= 4) { gameState.b = 0; gameState.s = 0; } }else if(action === 'strike') { gameState.s++; if(gameState.s >= 3) { gameState.b = 0; gameState.s = 0; incrementOut(); } }else if(action === 'out') { incrementOut(); }commit();}function incrementOut() { gameState.o++; if(gameState.o >= 3) { gameState.o = 0; gameState.b = 0; gameState.s = 0; gameState.runners = { 1: false, 2: false, 3: false }; } }function invertBase(num) { gameState.runners[num] = !gameState.runners[num]; commit(); }function wipeCount() { gameState.b = 0; gameState.s = 0; commit(); }function wipeBases() { gameState.runners = {1:false, 2:false, 3:false}; commit(); }function render() {// Controller sync elementsif(document.getElementById('input-away-name')) document.getElementById('input-away-name').value = gameState.awayName;if(document.getElementById('input-home-name')) document.getElementById('input-home-name').value = gameState.homeName;for(let i=1; i<=3; i++) {const cBtn = document.getElementById(ctrl-b${i});if(cBtn) cBtn.style.background = gameState.runners[i] ? '#fca311' : '#343a40';}// Graphic layer updatesdocument.getElementById('disp-away-name').innerText = gameState.awayName;document.getElementById('disp-home-name').innerText = gameState.homeName;document.getElementById('disp-away-score').innerText = gameState.away;document.getElementById('disp-home-score').innerText = gameState.home;document.getElementById('disp-inning-num').innerText = gameState.inning;document.getElementById('disp-inning-arrow').innerHTML = gameState.isTop ? '▲' : '▼';for(let i=1; i<=3; i++) document.getElementById(dot-b${i}).classList.toggle('b-active', gameState.b >= i);for(let i=1; i<=2; i++) document.getElementById(dot-s${i}).classList.toggle('s-active', gameState.s >= i);for(let i=1; i<=2; i++) document.getElementById(dot-o${i}).classList.toggle('o-active', gameState.o >= i);for(let i=1; i<=3; i++) document.getElementById(disp-base-${i}).classList.toggle('occupied', gameState.runners[i]);}// Setup views based on URL hashtag routingfunction initView() {if(window.location.hash === "#control") {document.getElementById('operator-deck').style.display = 'flex';document.getElementById('broadcast-canvas').style.display = 'none';} else {document.getElementById('operator-deck').style.display = 'none';document.getElementById('broadcast-canvas').style.display = 'flex';}pull();}window.addEventListener('storage', pull);window.addEventListener('hashchange', initView);setInterval(pull, 250); // Cloud synchronization heartbeat loopinitView();
+        function changeTeamName(team) {
