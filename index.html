@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YoloBox Broadcast Overlay Graphic</title>
+    <title>YoloBox Broadcast Overlay Graphic (4:3 Ratio Optimized)</title>
     <style>
         html, body {
             background-color: transparent;
@@ -12,26 +12,62 @@
             font-weight: 800; color: #ffffff;
             user-select: none; width: 100vw; height: 100vh; overflow: hidden;
         }
+
+        /* 4:3 Ratio Scorebug Box */
         .scorebug-container {
-            display: flex; align-items: center;
-            background-color: #0b0c10; border-radius: 4px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.7); height: 46px;
-            overflow: hidden; border: 1px solid #1f2833;
-            position: absolute; left: 40px; bottom: 40px; width: fit-content;
+            display: flex; 
+            align-items: center;
+            background-color: #0b0c10; 
+            border-radius: 4px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7); 
+            height: 52px; /* Made slightly taller to fit the 4:3 layout feel */
+            overflow: hidden; 
+            border: 1px solid #1f2833;
+            
+            /* Pinned to the 4:3 broadcast safe zone margins */
+            position: absolute; 
+            left: 30px; 
+            bottom: 30px; 
+            width: fit-content;
         }
+
         .team-block { display: flex; align-items: center; height: 100%; }
-        .team-title { padding: 0 16px; font-size: 15px; letter-spacing: 1px; display: flex; align-items: center; height: 100%; }
+        .team-title { padding: 0 14px; font-size: 15px; letter-spacing: 0.5px; display: flex; align-items: center; height: 100%; }
         .away-team .team-title { background-color: #bd1f36; }
         .home-team .team-title { background-color: #1f4ebd; }
-        .score-val { background-color: #1f232b; font-size: 22px; padding: 0 16px; display: flex; align-items: center; justify-content: center; min-width: 25px; height: 100%; }
-        .data-segment { display: flex; align-items: center; justify-content: center; height: 100%; border-left: 1px solid #2d323f; padding: 0 14px; background-color: #151922; }
-        .arrow-indicator { font-size: 12px; margin-right: 5px; color: #fca311; }
+        
+        .score-val { 
+            background-color: #1f232b; 
+            font-size: 24px; /* Slightly larger text for clarity at 4:3 */
+            padding: 0 14px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-width: 25px; 
+            height: 100%; 
+        }
+
+        .data-segment { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100%; 
+            border-left: 1px solid #2d323f; 
+            padding: 0 12px; 
+            background-color: #151922; 
+        }
+
+        .arrow-indicator { font-size: 12px; margin-right: 4px; color: #fca311; }
+        
+        /* Diamond Runners Mapping */
         .diamond-wrap { position: relative; width: 24px; height: 24px; transform: rotate(45deg); }
         .base-pad { position: absolute; width: 9px; height: 9px; background-color: #454d5a; border: 1px solid #151922; }
         .base-pad.b-1 { top: 0; right: 0; }
         .base-pad.b-2 { top: 0; left: 0; }
         .base-pad.b-3 { bottom: 0; left: 0; }
         .base-pad.occupied { background-color: #fca311; box-shadow: 0 0 6px #fca311; }
+
+        /* Ball, Strike, Out Compact Dot Matrix */
         .matrix-column { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: #8d99ae; }
         .matrix-row { display: flex; align-items: center; }
         .row-header { width: 10px; font-size: 10px; font-weight: bold; }
@@ -53,7 +89,6 @@
     </div>
     <script>
         function pull() {
-            // Key aligned perfectly with control.html
             const cache = localStorage.getItem('yolo_softball_engine');
             if(!cache) return;
             const state = JSON.parse(cache);
@@ -69,7 +104,7 @@
             for(let i=1; i<=3; i++) document.getElementById(`disp-base-${i}`).classList.toggle('occupied', state.runners[i]);
         }
         window.addEventListener('storage', pull);
-        setInterval(pull, 200); // 200ms rapid local data monitoring loop
+        setInterval(pull, 200);
         pull();
     </script>
 </body>
