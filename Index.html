@@ -1,0 +1,184 @@
+html<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Softball Scorebug Overlay System</title>
+    <style>
+        /* Base Canvas Styles */
+        html, body {
+            background-color: transparent;
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-weight: 800; color: #ffffff;
+            user-select: none; width: 100vw; height: 100vh; overflow: hidden;
+        }
+
+        /* ==========================================================================
+           1. CONTROLLER UI VIEW (Hidden by default, shown via URL #control flag)
+           ========================================================================== */
+        #operator-deck {
+            display: none;
+            background-color: #161a1d;
+            height: 100vh; width: 100vw;
+            padding: 25px; box-sizing: border-box;
+            flex-direction: column; justify-content: flex-start; gap: 20px;
+        }
+        h2 { margin: 0 0 10px 0; color: #adb5bd; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
+        .control-row { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .card {
+            background: #22252a; padding: 14px 20px; border-radius: 8px;
+            display: flex; align-items: center; gap: 12px; border: 1px solid #2f343c;
+        }
+        .card-label { font-size: 13px; text-transform: uppercase; color: #adb5bd; letter-spacing: 0.5px; }
+        .team-input {
+            background: #111; border: 1px solid #495057; color: #fff; padding: 8px;
+            width: 60px; border-radius: 4px; font-weight: bold; text-transform: uppercase; text-align: center; font-size: 14px;
+        }
+        button {
+            background-color: #343a40; color: #ffffff; border: 1px solid #495057;
+            padding: 14px 22px; font-size: 16px; cursor: pointer; border-radius: 6px; font-weight: bold;
+        }
+        button:active { background-color: #495057; }
+        .btn-add { background-color: #2b9348; border-color: #2b9348; }
+        .btn-sub { background-color: #e63946; border-color: #e63946; }
+
+        /* ==========================================================================
+           2. BROADCAST GRAPHICS LAYER VIEW (Default view shown on YoloBox)
+           ========================================================================== */
+        #broadcast-canvas {
+            display: flex; height: 100vh; width: 100vw; position: relative; background-color: transparent;
+        }
+        .scorebug-container {
+            display: flex; align-items: center;
+            background-color: #0b0c10; border-radius: 4px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7); height: 46px;
+            overflow: hidden; border: 1px solid #1f2833;
+            position: absolute; left: 40px; bottom: 40px; width: fit-content;
+        }
+        .team-block { display: flex; align-items: center; height: 100%; }
+        .team-title { padding: 0 16px; font-size: 15px; letter-spacing: 1px; display: flex; align-items: center; height: 100%; }
+        .away-team .team-title { background-color: #bd1f36; } 
+        .home-team .team-title { background-color: #1f4ebd; } 
+        .score-val { background-color: #1f232b; font-size: 22px; padding: 0 16px; display: flex; align-items: center; justify-content: center; min-width: 25px; height: 100%; }
+        .data-segment { display: flex; align-items: center; justify-content: center; height: 100%; border-left: 1px solid #2d323f; padding: 0 14px; background-color: #151922; }
+        .arrow-indicator { font-size: 12px; margin-right: 5px; color: #fca311; }
+        
+        /* Diamond Runners */
+        .diamond-wrap { position: relative; width: 24px; height: 24px; transform: rotate(45deg); }
+        .base-pad { position: absolute; width: 9px; height: 9px; background-color: #454d5a; border: 1px solid #151922; }
+        .base-pad.b-1 { top: 0; right: 0; }
+        .base-pad.b-2 { top: 0; left: 0; }
+        .base-pad.b-3 { bottom: 0; left: 0; }
+        .base-pad.occupied { background-color: #fca311; box-shadow: 0 0 6px #fca311; }
+
+        /* BSO Matrix */
+        .matrix-column { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: #8d99ae; }
+        .matrix-row { display: flex; align-items: center; }
+        .row-header { width: 10px; font-size: 10px; font-weight: bold; }
+        .dot-grid { display: flex; gap: 4px; margin-left: 6px; }
+        .indicator-dot { width: 7px; height: 7px; border-radius: 50%; background-color: #3d4554; }
+        .indicator-dot.b-active { background-color: #00f5d4; }
+        .indicator-dot.s-active { background-color: #ff5400; }
+        .indicator-dot.o-active { background-color: #fca311; }
+    </style>
+</head>
+<body>
+
+    <!-- VIEW A: IPAD CONTROL BOARD -->
+    <div id="operator-deck">
+        <h2>Softball Live Overlay Control Board</h2>
+        <div class="control-row">
+            <div class="card">
+                <span class="card-label">Away Name:</span>
+                <input type="text" class="team-input" id="input-away-name" value="AWY" maxlength="3" oninput="changeTeamName('away')">
+                <button class="btn-sub" onclick="modifyScore('away', -1)">-</button>
+                <button class="btn-add" onclick="modifyScore('away', 1)">+</button>
+            </div>
+            <div class="card">
+                <span class="card-label">Home Name:</span>
+                <input type="text" class="team-input" id="input-home-name" value="HOM" maxlength="3" oninput="changeTeamName('home')">
+                <button class="btn-sub" onclick="modifyScore('home', -1)">-</button>
+                <button class="btn-add" onclick="modifyScore('home', 1)">+</button>
+            </div>
+            <div class="card">
+                <span class="card-label">Inning</span>
+                <button onclick="shiftInningHalf()">Top/Bot</button>
+                <button class="btn-sub" onclick="modifyInningNum(-1)">-</button>
+                <button class="btn-add" onclick="modifyInningNum(1)">+</button>
+            </div>
+        </div>
+
+        <div class="control-row">
+            <div class="card">
+                <span class="card-label">Plate Count</span>
+                <button class="btn-add" onclick="registerCount('ball')">+ Ball</button>
+                <button class="btn-add" onclick="registerCount('strike')">+ Strike</button>
+                <button class="btn-sub" onclick="registerCount('out')">+ Out</button>
+                <button onclick="wipeCount()">Clear Count</button>
+            </div>
+            <div class="card">
+                <span class="card-label">Bases</span>
+                <button id="ctrl-b1" onclick="invertBase(1)">1st</button>
+                <button id="ctrl-b2" onclick="invertBase(2)">2nd</button>
+                <button id="ctrl-b3" onclick="invertBase(3)">3rd</button>
+                <button onclick="wipeBases()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW B: BROADCAST LAYER -->
+    <div id="broadcast-canvas">
+        <div class="scorebug-container">
+            <div class="team-block away-team">
+                <div class="team-title" id="disp-away-name">AWY</div>
+                <div class="score-val" id="disp-away-score">0</div>
+            </div>
+            <div class="team-block home-team">
+                <div class="team-title" id="disp-home-name">HOM</div>
+                <div class="score-val" id="disp-home-score">0</div>
+            </div>
+            <div class="data-segment">
+                <span class="arrow-indicator" id="disp-inning-arrow">&#9650;</span>
+                <span id="disp-inning-num">1</span>
+            </div>
+            <div class="data-segment">
+                <div class="diamond-wrap">
+                    <div class="base-pad b-2" id="disp-base-2"></div>
+                    <div class="base-pad b-1" id="disp-base-1"></div>
+                    <div class="base-pad b-3" id="disp-base-3"></div>
+                </div>
+            </div>
+            <div class="data-segment" style="min-width: 65px;">
+                <div class="matrix-column">
+                    <div class="matrix-row">
+                        <span class="row-header">B</span>
+                        <div class="dot-grid"><div class="indicator-dot" id="dot-b1"></div><div class="indicator-dot" id="dot-b2"></div><div class="indicator-dot" id="dot-b3"></div></div>
+                    </div>
+                    <div class="matrix-row">
+                        <span class="row-header">S</span>
+                        <div class="dot-grid"><div class="indicator-dot" id="dot-s1"></div><div class="indicator-dot" id="dot-s2"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="data-segment">
+                <div class="matrix-column">
+                    <div class="matrix-row">
+                        <span class="row-header">O</span>
+                        <div class="dot-grid"><div class="indicator-dot" id="dot-o1"></div><div class="indicator-dot" id="dot-o2"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIC CORE -->
+    <script>
+        let gameState = { away: 0, home: 0, awayName: 'AWY', homeName: 'HOM', isTop: true, inning: 1, b: 0, s: 0, o: 0, runners: { 1: false, 2: false, 3: false } };
+        
+        // Remote Cloud-Sync Functionality (Uses standard localStorage + cross-window listeners)
+        function commit() { localStorage.setItem('gh_softball_engine', JSON.stringify(gameState)); render(); }
+        function pull() { const cache = localStorage.getItem('gh_softball_engine'); if(cache) gameState = JSON.parse(cache); render(); }
+        
+        function modifyScore(team, delta) { gameState[team] = Math.max(0, gameState[team] + delta); commit(); }
+Use code with caution.function changeTeamName(team) {if(team === 'away') gameState.awayName = document.getElementById('input-away-name').value.toUpperCase();else gameState.homeName = document.getElementById('input-home-name').value.toUpperCase();commit();}function shiftInningHalf() { gameState.isTop = !gameState.isTop; commit(); }function modifyInningNum(delta) { gameState.inning = Math.max(1, gameState.inning + delta); commit(); }function registerCount(action) {if(action === 'ball') { gameState.b++; if(gameState.b >= 4) { gameState.b = 0; gameState.s = 0; } }else if(action === 'strike') { gameState.s++; if(gameState.s >= 3) { gameState.b = 0; gameState.s = 0; incrementOut(); } }else if(action === 'out') { incrementOut(); }commit();}function incrementOut() { gameState.o++; if(gameState.o >= 3) { gameState.o = 0; gameState.b = 0; gameState.s = 0; gameState.runners = { 1: false, 2: false, 3: false }; } }function invertBase(num) { gameState.runners[num] = !gameState.runners[num]; commit(); }function wipeCount() { gameState.b = 0; gameState.s = 0; commit(); }function wipeBases() { gameState.runners = {1:false, 2:false, 3:false}; commit(); }function render() {// Controller sync elementsif(document.getElementById('input-away-name')) document.getElementById('input-away-name').value = gameState.awayName;if(document.getElementById('input-home-name')) document.getElementById('input-home-name').value = gameState.homeName;for(let i=1; i<=3; i++) {const cBtn = document.getElementById(ctrl-b${i});if(cBtn) cBtn.style.background = gameState.runners[i] ? '#fca311' : '#343a40';}// Graphic layer updatesdocument.getElementById('disp-away-name').innerText = gameState.awayName;document.getElementById('disp-home-name').innerText = gameState.homeName;document.getElementById('disp-away-score').innerText = gameState.away;document.getElementById('disp-home-score').innerText = gameState.home;document.getElementById('disp-inning-num').innerText = gameState.inning;document.getElementById('disp-inning-arrow').innerHTML = gameState.isTop ? '▲' : '▼';for(let i=1; i<=3; i++) document.getElementById(dot-b${i}).classList.toggle('b-active', gameState.b >= i);for(let i=1; i<=2; i++) document.getElementById(dot-s${i}).classList.toggle('s-active', gameState.s >= i);for(let i=1; i<=2; i++) document.getElementById(dot-o${i}).classList.toggle('o-active', gameState.o >= i);for(let i=1; i<=3; i++) document.getElementById(disp-base-${i}).classList.toggle('occupied', gameState.runners[i]);}// Setup views based on URL hashtag routingfunction initView() {if(window.location.hash === "#control") {document.getElementById('operator-deck').style.display = 'flex';document.getElementById('broadcast-canvas').style.display = 'none';} else {document.getElementById('operator-deck').style.display = 'none';document.getElementById('broadcast-canvas').style.display = 'flex';}pull();}window.addEventListener('storage', pull);window.addEventListener('hashchange', initView);setInterval(pull, 250); // Cloud synchronization heartbeat loopinitView();
