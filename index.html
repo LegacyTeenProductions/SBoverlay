@@ -44,6 +44,15 @@
             height: 27.5vh; 
             border-bottom: 1vh solid #2d323f;
         }
+
+        /* Add this block inside your <style> tags to control logo formatting */
+        .team-logo {
+            height: 7vh;          /* Automatically scales nicely with your giant text */
+            width: auto;          /* Maintains the correct image aspect ratio */
+            margin-right: 2vh;    /* Pushes the logo slightly away from the team letters */
+        object-fit: contain;  /* Prevents the image from stretching awkwardly */
+        }
+
         .team-title {
             padding: 0 4vh;
             font-size: 11vh; /* Giant team font size */
@@ -165,6 +174,27 @@
 
         </div>
     </div>
+<!-- Locate your team-row blocks and update them to look like this: -->
+
+<!-- Away Team Row -->
+<div class="team-row away-team">
+    <div class="team-title">
+        <!-- This line inserts your away logo right next to the text -->
+        <img src="away-logo.png" class="team-logo" alt="Away Logo">
+        <span id="disp-away-name">AWY</span>
+    </div>
+    <div class="score-val" id="disp-away-score">0</div>
+</div>
+
+<!-- Home Team Row -->
+<div class="team-row home-team">
+    <div class="team-title">
+        <!-- This line inserts your home logo right next to the text -->
+        <img src="home-logo.png" class="team-logo" alt="Home Logo">
+        <span id="disp-home-name">HOM</span>
+    </div>
+    <div class="score-val" id="disp-home-score">0</div>
+</div>
 
     <!-- BACKEND ENGINE LOGIC CONFIGURATION -->
     <script>
