@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YoloBox Broadcast Overlay Graphic (4:3 Ratio Optimized)</title>
+    <title>Stacked Box Softball Scorebug Overlay</title>
     <style>
         html, body {
             background-color: transparent;
@@ -13,80 +13,146 @@
             user-select: none; width: 100vw; height: 100vh; overflow: hidden;
         }
 
-        /* 4:3 Ratio Scorebug Box */
+        /* Compact Stacked Square Box Layout */
         .scorebug-container {
-            display: flex; 
-            align-items: center;
-            background-color: #0b0c10; 
-            border-radius: 4px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.7); 
-            height: 52px; /* Made slightly taller to fit the 4:3 layout feel */
-            overflow: hidden; 
+            display: flex;
+            flex-direction: column; /* Stack rows vertically instead of a flat strip */
+            background-color: #0b0c10;
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+            width: 140px; /* Fixed square box width constraint */
+            overflow: hidden;
             border: 1px solid #1f2833;
             
-            /* Pinned to the 4:3 broadcast safe zone margins */
-            position: absolute; 
-            left: 30px; 
-            bottom: 30px; 
-            width: fit-content;
+            /* Pinned to the bottom-left corner */
+            position: absolute;
+            left: 40px;
+            bottom: 40px;
         }
 
-        .team-block { display: flex; align-items: center; height: 100%; }
-        .team-title { padding: 0 14px; font-size: 15px; letter-spacing: 0.5px; display: flex; align-items: center; height: 100%; }
+        /* Team Row Styles */
+        .team-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 34px;
+            border-bottom: 1px solid #2d323f;
+        }
+        .team-title {
+            padding: 0 12px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
         .away-team .team-title { background-color: #bd1f36; }
         .home-team .team-title { background-color: #1f4ebd; }
         
-        .score-val { 
-            background-color: #1f232b; 
-            font-size: 24px; /* Slightly larger text for clarity at 4:3 */
-            padding: 0 14px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-width: 25px; 
-            height: 100%; 
+        .score-val {
+            background-color: #1f232b;
+            font-size: 18px;
+            width: 40px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .data-segment { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100%; 
-            border-left: 1px solid #2d323f; 
-            padding: 0 12px; 
-            background-color: #151922; 
+        /* Game Data Status Row (Bottom Row of Box) */
+        .status-row {
+            display: flex;
+            align-items: center;
+            height: 40px;
+            background-color: #151922;
         }
 
-        .arrow-indicator { font-size: 12px; margin-right: 4px; color: #fca311; }
+        .data-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            flex: 1;
+        }
+        .data-segment:not(:last-child) {
+            border-right: 1px solid #2d323f;
+        }
+
+        .arrow-indicator { font-size: 11px; margin-right: 3px; color: #fca311; }
+        .inning-num { font-size: 15px; }
         
         /* Diamond Runners Mapping */
-        .diamond-wrap { position: relative; width: 24px; height: 24px; transform: rotate(45deg); }
-        .base-pad { position: absolute; width: 9px; height: 9px; background-color: #454d5a; border: 1px solid #151922; }
+        .diamond-wrap { position: relative; width: 22px; height: 22px; transform: rotate(45deg); }
+        .base-pad { position: absolute; width: 8px; height: 8px; background-color: #454d5a; border: 1px solid #151922; }
         .base-pad.b-1 { top: 0; right: 0; }
         .base-pad.b-2 { top: 0; left: 0; }
         .base-pad.b-3 { bottom: 0; left: 0; }
         .base-pad.occupied { background-color: #fca311; box-shadow: 0 0 6px #fca311; }
 
-        /* Ball, Strike, Out Compact Dot Matrix */
-        .matrix-column { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: #8d99ae; }
+        /* BSO Matrix Panel Inside Box */
+        .matrix-column { display: flex; flex-direction: column; gap: 3px; font-size: 10px; color: #8d99ae; }
         .matrix-row { display: flex; align-items: center; }
-        .row-header { width: 10px; font-size: 10px; font-weight: bold; }
-        .dot-grid { display: flex; gap: 4px; margin-left: 6px; }
-        .indicator-dot { width: 7px; height: 7px; border-radius: 50%; background-color: #3d4554; }
+        .row-header { width: 8px; font-size: 9px; font-weight: bold; text-align: center; }
+        .dot-grid { display: flex; gap: 3px; margin-left: 4px; }
+        .indicator-dot { width: 6px; height: 6px; border-radius: 50%; background-color: #3d4554; }
         .indicator-dot.b-active { background-color: #00f5d4; }
         .indicator-dot.s-active { background-color: #ff5400; }
         .indicator-dot.o-active { background-color: #fca311; }
     </style>
 </head>
 <body>
+
     <div class="scorebug-container">
-        <div class="team-block away-team"><div class="team-title" id="disp-away-name">AWY</div><div class="score-val" id="disp-away-score">0</div></div>
-        <div class="team-block home-team"><div class="team-title" id="disp-home-name">HOM</div><div class="score-val" id="disp-home-score">0</div></div>
-        <div class="data-segment"><span class="arrow-indicator" id="disp-inning-arrow">&#9650;</span><span id="disp-inning-num">1</span></div>
-        <div class="data-segment"><div class="diamond-wrap"><div class="base-pad b-2" id="disp-base-2"></div><div class="base-pad b-1" id="disp-base-1"></div><div class="base-pad b-3" id="disp-base-3"></div></div></div>
-        <div class="data-segment" style="min-width: 65px;"><div class="matrix-column"><div class="matrix-row"><span class="row-header">B</span><div class="dot-grid"><div class="indicator-dot" id="dot-b1"></div><div class="indicator-dot" id="dot-b2"></div><div class="indicator-dot" id="dot-b3"></div></div></div><div class="matrix-row"><span class="row-header">S</span><div class="dot-grid"><div class="indicator-dot" id="dot-s1"></div><div class="indicator-dot" id="dot-s2"></div></div></div></div></div>
-        <div class="data-segment"><div class="matrix-column"><div class="matrix-row"><span class="row-header">O</span><div class="dot-grid"><div class="indicator-dot" id="dot-o1"></div><div class="indicator-dot" id="dot-o2"></div></div></div></div></div>
+        <!-- Row 1: Away Team Info -->
+        <div class="team-row away-team">
+            <div class="team-title" id="disp-away-name">AWY</div>
+            <div class="score-val" id="disp-away-score">0</div>
+        </div>
+
+        <!-- Row 2: Home Team Info -->
+        <div class="team-row home-team">
+            <div class="team-title" id="disp-home-name">HOM</div>
+            <div class="score-val" id="disp-home-score">0</div>
+        </div>
+
+        <!-- Row 3: Live Stats Status -->
+        <div class="status-row">
+            <!-- Inning Segment -->
+            <div class="data-segment">
+                <span class="arrow-indicator" id="disp-inning-arrow">&#9650;</span>
+                <span class="inning-num" id="disp-inning-num">1</span>
+            </div>
+
+            <!-- Base Runners Diamond Segment -->
+            <div class="data-segment">
+                <div class="diamond-wrap">
+                    <div class="base-pad b-2" id="disp-base-2"></div>
+                    <div class="base-pad b-1" id="disp-base-1"></div>
+                    <div class="base-pad b-3" id="disp-base-3"></div>
+                </div>
+            </div>
+
+            <!-- Ball/Strike/Out Matrix Segment -->
+            <div class="data-segment">
+                <div class="matrix-column">
+                    <div class="matrix-row">
+                        <span class="row-header">B</span>
+                        <div class="dot-grid"><div class="indicator-dot" id="dot-b1"></div><div class="indicator-dot" id="dot-b2"></div><div class="indicator-dot" id="dot-b3"></div></div>
+                    </div>
+                    <div class="matrix-row">
+                        <span class="row-header">S</span>
+                        <div class="dot-grid"><div class="indicator-dot" id="dot-s1"></div><div class="indicator-dot" id="dot-s2"></div></div>
+                    </div>
+                    <div class="matrix-row">
+                        <span class="row-header">O</span>
+                        <div class="dot-grid"><div class="indicator-dot" id="dot-o1"></div><div class="indicator-dot" id="dot-o2"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
     <script>
         function pull() {
             const cache = localStorage.getItem('yolo_softball_engine');
