@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full Screen Scalable Square Scorebug Overlay</title>
+    <title>Massive Webpage-Filling Square Scorebug Overlay</title>
     <style>
-        /* Base Viewport Canvas - Standard Full Screen 16:9 Aspect Ratio */
+        /* Base Viewport Canvas - Centers the massive box perfectly */
         html, body {
             background-color: transparent;
             margin: 0; padding: 0;
@@ -15,40 +15,39 @@
             width: 100vw; 
             height: 100vh; 
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Large Bounding Box Container - Uses scalable 'vh' units to respond to downscaling perfectly */
+        /* Massive Square Container Box - Locked to fill the max height of the webpage canvas */
         .scorebug-container {
             display: flex;
             flex-direction: column; 
             background-color: #0b0c10;
-            border-radius: 0.8vh;
-            box-shadow: 0 1vh 3vh rgba(0,0,0,0.8);
+            border-radius: 4vh;
+            box-shadow: 0 4vh 10vh rgba(0,0,0,0.8);
             
-            /* Designed as a perfect scalable square ratio */
-            width: 18vh; 
-            height: 18vh; 
+            /* Shaped as a massive square based on the screen's height */
+            width: 90vh; 
+            height: 90vh; 
             overflow: hidden;
-            border: 0.2vh solid #1f2833;
-            
-            /* Positioned in the lower-left corner with safe-zone padding */
-            position: absolute;
-            left: 4vh;
-            bottom: 4vh;
+            border: 1.5vh solid #1f2833;
+            box-sizing: border-box;
         }
 
-        /* Team Row Element Layouts */
+        /* Team Row Element Layouts (Taller block spacing) */
         .team-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 5.5vh; 
-            border-bottom: 0.2vh solid #2d323f;
+            height: 27.5vh; 
+            border-bottom: 1vh solid #2d323f;
         }
         .team-title {
-            padding: 0 1.6vh;
-            font-size: 2vh; 
-            letter-spacing: 0.1vh;
+            padding: 0 6vh;
+            font-size: 11vh; /* Giant team font size */
+            letter-spacing: 0.5vh;
             height: 100%;
             display: flex;
             align-items: center;
@@ -60,8 +59,8 @@
         
         .score-val {
             background-color: #1f232b;
-            font-size: 2.8vh; 
-            width: 5.5vh;
+            font-size: 14vh; /* Giant score number readout */
+            width: 28vh;
             height: 100%;
             display: flex;
             align-items: center;
@@ -69,11 +68,11 @@
             font-weight: 900;
         }
 
-        /* Bottom Game Stats Data Bar */
+        /* Bottom Game Stats Data Bar (Takes up remaining 35% of square height) */
         .status-row {
             display: flex;
             align-items: center;
-            height: 7vh;
+            height: 35vh;
             background-color: #151922;
         }
 
@@ -85,27 +84,27 @@
             flex: 1;
         }
         .data-segment:not(:last-child) {
-            border-right: 0.2vh solid #2d323f;
+            border-right: 1vh solid #2d323f;
         }
 
         /* Inning layouts */
-        .arrow-indicator { font-size: 1.4vh; margin-right: 0.4vh; color: #fca311; }
-        .inning-num { font-size: 2.2vh; font-weight: 900; }
+        .arrow-indicator { font-size: 7vh; margin-right: 1.5vh; color: #fca311; line-height: 1; }
+        .inning-num { font-size: 11vh; font-weight: 900; line-height: 1; }
         
         /* Diamond Runners Mapping */
-        .diamond-wrap { position: relative; width: 2.8vh; height: 2.8vh; transform: rotate(45deg); }
-        .base-pad { position: absolute; width: 1vh; height: 1vh; background-color: #454d5a; border: 0.1vh solid #151922; }
+        .diamond-wrap { position: relative; width: 14vh; height: 14vh; transform: rotate(45deg); }
+        .base-pad { position: absolute; width: 5.5vh; height: 5.5vh; background-color: #454d5a; border: 0.8vh solid #151922; border-radius: 0.5vh; }
         .base-pad.b-1 { top: 0; right: 0; }
         .base-pad.b-2 { top: 0; left: 0; }
         .base-pad.b-3 { bottom: 0; left: 0; }
-        .base-pad.occupied { background-color: #fca311; box-shadow: 0 0 0.8vh #fca311; }
+        .base-pad.occupied { background-color: #fca311; box-shadow: 0 0 4vh #fca311; }
 
         /* BSO Count Tracking Matrix Layout */
-        .matrix-column { display: flex; flex-direction: column; gap: 0.4vh; font-size: 1.1vh; color: #8d99ae; }
+        .matrix-column { display: flex; flex-direction: column; gap: 2vh; font-size: 4vh; color: #8d99ae; }
         .matrix-row { display: flex; align-items: center; }
-        .row-header { width: 1vh; font-size: 1.1vh; font-weight: bold; text-align: center; }
-        .dot-grid { display: flex; gap: 0.4vh; margin-left: 0.6vh; }
-        .indicator-dot { width: 0.8vh; height: 0.8vh; border-radius: 50%; background-color: #3d4554; }
+        .row-header { width: 4vh; font-size: 4vh; font-weight: bold; text-align: center; }
+        .dot-grid { display: flex; gap: 1.5vh; margin-left: 2vh; }
+        .indicator-dot { width: 4vh; height: 4vh; border-radius: 50%; background-color: #3d4554; }
         .indicator-dot.b-active { background-color: #00f5d4; }
         .indicator-dot.s-active { background-color: #ff5400; }
         .indicator-dot.o-active { background-color: #fca311; }
